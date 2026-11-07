@@ -3,6 +3,10 @@ import { createClient } from '@supabase/supabase-js';
 
 const url = import.meta.env.VITE_SUPABASE_URL;
 const key = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+const loginEmails = Object.freeze(Object.assign(Object.create(null), {
+  koka_manager: 'koka_manager@koka.example',
+  koka_chef: 'koka_chef@koka.example',
+}));
 const client = url && key ? createClient(url, key) : null;
 
 async function readRows(table) {
@@ -62,13 +66,14 @@ export default function SecureWorkspace({ App }) {
   async function signIn(event) {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
+    const identifier = String(form.get('identifier')).trim();
     setError('');
     setBusy(true);
     try {
       const { error: failure } = await client.auth.signInWithPassword({
-        email: form.get('email'), password: form.get('password'),
+        email: loginEmails[identifier.toLowerCase()] ?? identifier, password: form.get('password'),
       });
-      if (failure) setError('تعذر تسجيل الدخول. تحقق من البريد وكلمة المرور.');
+      if (failure) setError('تعذر تسجيل الدخول. تحقق من اسم المستخدم أو البريد وكلمة المرور.');
     } catch {
       setError('تعذر الاتصال بخدمة تسجيل الدخول.');
     } finally {
@@ -97,7 +102,7 @@ export default function SecureWorkspace({ App }) {
         : session === undefined ? <p>جاري التحقق من الجلسة…</p>
         : userId ? <><p>{error || 'جاري تحميل مساحة العمل…'}</p><button className="light-button" onClick={signOut}>تسجيل الخروج</button></>
         : <form className="form-fields" onSubmit={signIn}>
-          <label>البريد الإلكتروني<input name="email" type="email" autoComplete="username" required/></label>
+          <label>اسم المستخدم أو البريد الإلكتروني<input name="identifier" type="text" autoComplete="username" autoCapitalize="none" required/></label>
           <label>كلمة المرور<input name="password" type="password" autoComplete="current-password" required/></label>
           {error && <p role="alert">{error}</p>}
           <button className="dark-button" disabled={busy}>{busy ? 'جاري تسجيل الدخول…' : 'تسجيل الدخول'}</button>
