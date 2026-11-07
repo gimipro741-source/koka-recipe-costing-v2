@@ -85,3 +85,6 @@
 .department-gallery .department-card:focus-within{outline:3px solid #b07942;outline-offset:3px}
 @media(max-width:1100px){.department-gallery .department-card{min-height:390px}}
 @media(max-width:600px){.department-gallery{gap:10px}.department-gallery .department-card{min-height:350px;aspect-ratio:auto}.department-gallery .dept-body{margin:7px;padding:12px 9px 9px}.department-gallery .dept-body h3{font-size:15px}.department-gallery .dept-body p{font-size:11px}.department-gallery .dept-bottom span{font-size:9px}}
+.auth-screen{min-height:100dvh;display:grid;place-items:center;padding:24px;background:#24161f}
+.auth-panel{width:min(100%,420px);padding:26px}
+.auth-panel img{width:64px;height:auto}
