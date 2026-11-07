@@ -1,3 +1,5 @@
+import { ArrowUpLeft, Eye, EyeOff, LockKeyhole, UserRound } from 'lucide-react';
+import './auth.css';
 import React, { useEffect, useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
@@ -36,6 +38,7 @@ export default function SecureWorkspace({ App }) {
   const [workspace, setWorkspace] = useState(null);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const userId = session?.user.id;
 
   useEffect(() => {
@@ -95,18 +98,42 @@ export default function SecureWorkspace({ App }) {
     return <App key={userId} workspace={workspace} signOut={signOut} authError={error}/>;
   }
   return <main className="auth-screen" dir="rtl">
-    <section className="modal auth-panel">
-      <img src={import.meta.env.BASE_URL + 'koka-official-logo.png'} alt="حلواني قوقه"/>
-      <h1>دخول مساحة عمل KOKA</h1>
-      {!client ? <p>اتصال قاعدة البيانات قيد الإعداد.</p>
-        : session === undefined ? <p>جاري التحقق من الجلسة…</p>
-        : userId ? <><p>{error || 'جاري تحميل مساحة العمل…'}</p><button className="light-button" onClick={signOut}>تسجيل الخروج</button></>
-        : <form className="form-fields" onSubmit={signIn}>
-          <label>اسم المستخدم أو البريد الإلكتروني<input name="identifier" type="text" autoComplete="username" autoCapitalize="none" required/></label>
-          <label>كلمة المرور<input name="password" type="password" autoComplete="current-password" required/></label>
-          {error && <p role="alert">{error}</p>}
-          <button className="dark-button" disabled={busy}>{busy ? 'جاري تسجيل الدخول…' : 'تسجيل الدخول'}</button>
-        </form>}
-    </section>
+    <div className="auth-shell">
+      <section className="auth-panel" aria-labelledby="auth-title">
+        <div className="auth-brand">
+          <img src={import.meta.env.BASE_URL + 'koka-official-logo.png'} alt=""/>
+          <span>حلواني قوقه<small lang="en">KOKA Patisserie</small></span>
+        </div>
+        <h1 id="auth-title">أهلاً بك في قوقه</h1>
+        <p className="auth-intro">سجّل الدخول لإدارة الوصفات والخامات والتكاليف.</p>
+        {!client ? <p role="status">اتصال قاعدة البيانات قيد الإعداد.</p>
+          : session === undefined ? <p role="status">جاري التحقق من الجلسة…</p>
+          : userId ? <><p role="status">{error || 'جاري تحميل مساحة العمل…'}</p><button className="auth-submit" onClick={signOut}>تسجيل الخروج</button></>
+          : <form className="auth-form" onSubmit={signIn}>
+            <label htmlFor="auth-identifier">اسم المستخدم أو البريد الإلكتروني</label>
+            <div className="auth-field">
+              <UserRound size={18} aria-hidden="true"/>
+              <input id="auth-identifier" name="identifier" dir="auto" placeholder="مثال: koka_manager" autoComplete="username" autoCapitalize="none" spellCheck={false} required/>
+            </div>
+            <label htmlFor="auth-password">كلمة المرور</label>
+            <div className="auth-field">
+              <LockKeyhole size={18} aria-hidden="true"/>
+              <input id="auth-password" name="password" dir="ltr" type={showPassword ? 'text' : 'password'} autoComplete="current-password" required/>
+              <button className="auth-eye" type="button" aria-label={showPassword ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور'} onClick={() => setShowPassword(value => !value)}>
+                {showPassword ? <EyeOff size={18}/> : <Eye size={18}/>}
+              </button>
+            </div>
+            {error && <p className="auth-error" role="alert">{error}</p>}
+            <button className="auth-submit" disabled={busy}>
+              <span role="status">{busy ? 'جاري تسجيل الدخول…' : 'تسجيل الدخول'}</span>
+              {busy ? <span className="auth-spinner" aria-hidden="true"/> : <ArrowUpLeft size={18} aria-hidden="true"/>}
+            </button>
+          </form>}
+      </section>
+      <aside className="auth-art" aria-hidden="true">
+        <img src={import.meta.env.BASE_URL + 'departments/bakery.jpg'} alt=""/>
+        <div className="auth-art-copy"><span lang="en">KOKA</span><p>من المطبخ إلى دفتر الوصفات</p></div>
+      </aside>
+    </div>
   </main>;
 }
